@@ -38,9 +38,9 @@ func TestS3Downloader(t *testing.T) {
 			session := s3opm.GenerateSession()
 
 			/* s3の読み込みファイルを生成 */
-			file, err := s3opm.GenerateS3ReadingFile(tt.args.localFilePath)
+			file, err := os.Create(tt.args.localFilePath)
 			if err != nil {
-				t.Errorf("GenerateS3ReadingFile error: %v\n", err)
+				t.Errorf("os.Create error: %v\n", err)
 				return
 			}
 
@@ -52,7 +52,7 @@ func TestS3Downloader(t *testing.T) {
 			}
 
 			/* s3から指定したファイルをダウンロード */
-			n, err := s3opm.S3DownLoader(session, file, tt.args.s3BucketName, tt.args.s3ObjectPath)
+			mng, err := s3opm.S3DownLoader(session, file, tt.args.s3BucketName, tt.args.s3ObjectPath)
 			if err != nil {
 				t.Errorf("S3DownLoader error: %v\n", err)
 				return
@@ -66,12 +66,12 @@ func TestS3Downloader(t *testing.T) {
 			}
 
 			/* ダウンロード前後でファイル容量を比較 */
-			if afterDate.Size() <= initDate.Size() || afterDate.Size() != n {
+			if afterDate.Size() <= initDate.Size() || afterDate.Size() != mng {
 				t.Error("s3 download process may have failed.")
 				return
 			}
 
-			fmt.Printf("Download process from S3 completed. DownloadedSize: %d byte\n", n)
+			fmt.Printf("Download process from S3 completed. DownloadedSize: %d byte\n", mng)
 			t.Logf("%s fin.\n", tt.name)
 		})
 	}
